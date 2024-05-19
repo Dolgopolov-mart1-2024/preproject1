@@ -1,0 +1,4 @@
+#file from settings connect to database
+db.url=
+db.username=
+db.password=
