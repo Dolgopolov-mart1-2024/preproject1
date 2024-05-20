@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
-    private static final Properties properties = new Properties();
+    private static final Properties PROPERTIES = new Properties();
 
     static {
         try (InputStream input = Util.class.getClassLoader().getResourceAsStream("application.properties")) {
@@ -17,16 +17,16 @@ public class Util {
                 System.out.println("файл application.properties не найден");
 
             } else {
-                properties.load(input);
+                PROPERTIES.load(input);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    private static final String USERNAME = properties.getProperty("db.username");
-    private static final String PASSWORD = properties.getProperty("db.password");
-    private static final String URL = properties.getProperty("db.url");
+    private static final String USERNAME = PROPERTIES.getProperty("db.username");
+    private static final String PASSWORD = PROPERTIES.getProperty("db.password");
+    private static final String URL = PROPERTIES.getProperty("db.url");
 
     private Util() {
     }
