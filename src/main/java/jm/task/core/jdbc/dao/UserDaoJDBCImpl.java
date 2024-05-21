@@ -13,10 +13,18 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
+    private static UserDaoJDBCImpl instance;
     private static final Connection connection = Util.getConnection();
 
     public UserDaoJDBCImpl() {
 
+    }
+
+    public static UserDaoJDBCImpl getInstance() {
+        if (instance == null) {
+            instance = new UserDaoJDBCImpl();
+        }
+        return instance;
     }
 
     public void createUsersTable() {
@@ -39,24 +47,38 @@ public class UserDaoJDBCImpl implements UserDao {
         }
     }
 
-    public void saveUser(String name, String lastName, byte age) {
+    public void saveUser(User user) {
         String insertUserSQL = "INSERT INTO users (name, lastName, age) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertUserSQL)) {
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, lastName);
-            preparedStatement.setByte(3, age);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getLastName());
+            preparedStatement.setByte(3, user.getAge());
             preparedStatement.executeUpdate();
-            System.out.println("User с именем – " + name + " " + lastName + " добавлен в базу данных");
+            System.out.println("User с именем – " + user.getName() + " " + user.getLastName() + " добавлен в базу данных");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void removeUserById(long id) {
+        String selectUserSQL = "SELECT * FROM users WHERE id = ?";
         String deleteUserSQL = "DELETE FROM users WHERE id = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteUserSQL)) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
+        try (PreparedStatement selectPreparedStatement = connection.prepareStatement(selectUserSQL);
+             PreparedStatement deletePreparedStatement = connection.prepareStatement(deleteUserSQL)) {
+
+            selectPreparedStatement.setLong(1, id);
+            ResultSet resultSet = selectPreparedStatement.executeQuery();
+            if (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getLong("id"));
+                user.setName(resultSet.getString("name"));
+                user.setLastName(resultSet.getString("lastName"));
+                user.setAge(resultSet.getByte("age"));
+
+                deletePreparedStatement.setLong(1, user.getId());
+                deletePreparedStatement.executeUpdate();
+                System.out.println("User с именем – " + user.getName() + " " + user.getLastName() + " удален из базы данных");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
