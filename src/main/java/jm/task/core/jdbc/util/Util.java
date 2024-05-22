@@ -1,5 +1,8 @@
 package jm.task.core.jdbc.util;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -34,14 +37,28 @@ public class Util {
     public static Connection getConnection() {
         Connection connection = null;
         try {
-            // Регистрация драйвера
+
             DriverManager.registerDriver(new org.postgresql.Driver());
-            // Получение соединения
+
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return connection;
 
+
+    }
+    private static SessionFactory sessionFactory;
+
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            try {
+                Configuration configuration = new Configuration().configure("hibernate.cfg.xml");
+                sessionFactory = configuration.buildSessionFactory();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return sessionFactory;
     }
 }
